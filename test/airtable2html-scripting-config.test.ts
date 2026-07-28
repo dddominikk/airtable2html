@@ -18,10 +18,13 @@ const fields: AirtableScriptingField[] = [
 ];
 
 class MockRecord implements AirtableScriptingRecord {
-  constructor(
-    readonly id: string,
-    readonly values: Readonly<Record<string, unknown>>,
-  ) {}
+  readonly id: string;
+  readonly values: Readonly<Record<string, unknown>>;
+
+  constructor(id: string, values: Readonly<Record<string, unknown>>) {
+    this.id = id;
+    this.values = values;
+  }
 
   getCellValue(field: AirtableScriptingField | string): unknown {
     const name = typeof field === 'string' ? field : field.name;
