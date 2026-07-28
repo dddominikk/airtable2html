@@ -3,4 +3,7 @@ export {
   escapeHtml,
   renderHtml,
 } from './html.ts';
-export { renderMarkdown } from './markdown.ts';
+export {
+  renderMarkdown,
+  wrapHtmlInMarkdown,
+} from './markdown.ts';
