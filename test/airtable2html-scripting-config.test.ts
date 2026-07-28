@@ -216,7 +216,9 @@ test('source settings override defaults and nested HTML settings merge', async (
 
   assert.equal(resolved.source.table, 'tblSecond0000001');
   assert.equal(resolved.source.view, 'viwSecond0000002');
-  assert.equal(resolved.columns?.[0]?.header, 'Source Value');
+  assert.deepEqual(resolved.columns, [
+    { field: 'Value', header: 'Source Value' },
+  ]);
   assert.equal(resolved.records?.limit, 1);
   assert.deepEqual(resolved.html?.tableAttributes, {
     border: 1,
