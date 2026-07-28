@@ -33,6 +33,10 @@ export type Airtable2HtmlSourcePreset = Partial<Airtable2HtmlSettings> & {
 
 export type UnknownSourceAction = 'throw' | 'warn' | 'ignore';
 
+export interface Airtable2HtmlConsole {
+  warn(...values: unknown[]): void;
+}
+
 export type Airtable2HtmlPreset = Partial<Airtable2HtmlSettings> & {
   sources?: Readonly<Record<string, Airtable2HtmlSourcePreset>>;
   unknownSourceAction?: UnknownSourceAction;
@@ -41,6 +45,7 @@ export type Airtable2HtmlPreset = Partial<Airtable2HtmlSettings> & {
 export interface Airtable2HtmlScriptingOptions {
   base: AirtableScriptingBase;
   config?: Airtable2HtmlPreset;
+  console?: Airtable2HtmlConsole;
   table?: TableReference;
   view?: ViewReference;
 }
@@ -86,6 +91,7 @@ function handleUnknownSource(
   table: { id: string; name: string },
   sourcePreset: Airtable2HtmlSourcePreset | undefined,
   action: UnknownSourceAction,
+  warningConsole: Airtable2HtmlConsole,
 ): void {
   const hasConfiguredSources = Object.keys(config.sources ?? {}).length > 0;
 
@@ -101,7 +107,7 @@ function handleUnknownSource(
     );
   }
 
-  console.warn(
+  warningConsole.warn(
     `airtable2html selected table ${tableDescription}, but no matching ` +
       'entry was found in config.sources. Rendering will continue because ' +
       'config.unknownSourceAction is not "throw" (resolved action: "warn").',
@@ -210,6 +216,7 @@ export function resolveAirtableScriptingConfig(
   const unknownSourceAction = resolveUnknownSourceAction(
     preset.unknownSourceAction,
   );
+  const warningConsole = options.console ?? globalThis.console;
 
   const firstTable = base.tables?.[0];
   const tableReference = options.table ?? firstTable?.id;
@@ -223,7 +230,13 @@ export function resolveAirtableScriptingConfig(
   const table = adapter.resolveTable(tableReference);
   const sourcePreset = findSourcePreset(preset, table);
 
-  handleUnknownSource(preset, table, sourcePreset, unknownSourceAction);
+  handleUnknownSource(
+    preset,
+    table,
+    sourcePreset,
+    unknownSourceAction,
+    warningConsole,
+  );
 
   const firstView = table.handle.views?.[0];
   const viewReference = options.view ?? sourcePreset?.view ?? firstView?.id;

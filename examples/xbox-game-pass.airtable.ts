@@ -97,6 +97,7 @@ const CONFIG: Airtable2HtmlPreset = {
 
 const html = await airtable2html({
   base,
+  console,
   config: CONFIG,
   table: 'tbl6Xno8SQ5hv39nV',
 });
