@@ -14,8 +14,12 @@ export {
   builtInTransforms,
   createTransformRegistry,
   fallback,
+  formatInferredDateAsMonthDay,
+  formatMonthCountDuration,
   identity,
   join,
+  normalizeHowLongToBeatDuration,
+  normalizeXboxGamePassPlatforms,
   regexReplace,
   resolveTransform,
   trim,
@@ -52,6 +56,11 @@ export type {
   Airtable2HtmlSourcePreset,
   AirtableScriptingConfig,
 } from './airtable-scripting-config.ts';
+export type {
+  FormatMonthCountDurationOptions,
+  NormalizeHowLongToBeatDurationOptions,
+  NormalizeXboxGamePassPlatformsOptions,
+} from './transforms/index.ts';
 export type {
   Airtable2HtmlConfig,
   CellTransform,
