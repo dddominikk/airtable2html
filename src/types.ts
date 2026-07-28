@@ -53,6 +53,7 @@ export interface ColumnConfig<RecordHandle = unknown> {
   transform?: TransformReference<RecordHandle>;
   value?: CellValueMode;
   emptyValue?: string;
+  [property: string]: unknown;
 }
 
 export type ColumnInput<RecordHandle = unknown> =
@@ -89,6 +90,32 @@ export interface MarkdownRenderOptions {
   language?: string;
 }
 
+export interface HtmlPipelineContext<
+  TableHandle = unknown,
+  ViewHandle = unknown,
+  FieldHandle = unknown,
+  RecordHandle = unknown,
+> {
+  model: TableModel;
+  config: Airtable2HtmlConfig<TableHandle, ViewHandle, FieldHandle, RecordHandle>;
+  index: number;
+}
+
+export type HtmlPipelineCallback<
+  TableHandle = unknown,
+  ViewHandle = unknown,
+  FieldHandle = unknown,
+  RecordHandle = unknown,
+> = (
+  html: string,
+  context: HtmlPipelineContext<
+    TableHandle,
+    ViewHandle,
+    FieldHandle,
+    RecordHandle
+  >,
+) => string | Promise<string>;
+
 export interface Airtable2HtmlConfig<
   TableHandle = unknown,
   ViewHandle = unknown,
@@ -100,6 +127,12 @@ export interface Airtable2HtmlConfig<
   columns?: readonly ColumnInput<RecordHandle>[];
   records?: RecordConfig;
   transforms?: Readonly<Record<string, CellTransform<RecordHandle>>>;
+  pipeline?: readonly HtmlPipelineCallback<
+    TableHandle,
+    ViewHandle,
+    FieldHandle,
+    RecordHandle
+  >[];
   output?: OutputConfig;
   html?: HtmlRenderOptions;
   markdown?: MarkdownRenderOptions;
