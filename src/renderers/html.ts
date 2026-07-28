@@ -42,12 +42,13 @@ export function renderHtml(
   const indent = options.indent ?? defaultHtmlOptions.indent;
   const newline = pretty ? '\n' : '';
   const level = (depth: number) => (pretty ? indent.repeat(depth) : '');
-  const text = (value: string) => (shouldEscape ? escapeHtml(value) : value);
+  const cellText = (value: string) =>
+    shouldEscape ? escapeHtml(value) : value;
 
   const headerCells = model.columns
     .map(
       (column) =>
-        `${level(3)}<th${renderAttributes(options.headerCellAttributes)}>${text(column.header)}</th>`,
+        `${level(3)}<th${renderAttributes(options.headerCellAttributes)}>${column.header}</th>`,
     )
     .join(newline);
 
@@ -56,7 +57,7 @@ export function renderHtml(
       const cells = row.cells
         .map(
           (cell) =>
-            `${level(3)}<td${renderAttributes(options.cellAttributes)}>${text(cell.text)}</td>`,
+            `${level(3)}<td${renderAttributes(options.cellAttributes)}>${cellText(cell.text)}</td>`,
         )
         .join(newline);
 
