@@ -1,5 +1,9 @@
 export { airtable2html, default } from './airtable2html.ts';
 export {
+  isAirtable2HtmlScriptingOptions,
+  resolveAirtableScriptingConfig,
+} from './airtable-scripting-config.ts';
+export {
   createAirtableTableModel,
   defaults,
   stringifyCellValue,
@@ -41,6 +45,13 @@ export type {
   AirtableScriptingTable,
   AirtableScriptingView,
 } from './adapters/airtable-scripting.ts';
+export type {
+  Airtable2HtmlPreset,
+  Airtable2HtmlScriptingOptions,
+  Airtable2HtmlSettings,
+  Airtable2HtmlSourcePreset,
+  AirtableScriptingConfig,
+} from './airtable-scripting-config.ts';
 export type {
   Airtable2HtmlConfig,
   CellTransform,
