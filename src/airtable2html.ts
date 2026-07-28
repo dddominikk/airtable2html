@@ -28,7 +28,7 @@ export function airtable2html<
 export async function airtable2html(
   input:
     | Airtable2HtmlScriptingOptions
-    | Airtable2HtmlConfig<unknown, unknown, unknown, unknown>,
+    | Airtable2HtmlConfig<any, any, any, any>,
 ): Promise<string> {
   const config = isAirtable2HtmlScriptingOptions(input)
     ? resolveAirtableScriptingConfig(input)
