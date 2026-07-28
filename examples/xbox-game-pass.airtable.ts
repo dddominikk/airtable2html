@@ -1,92 +1,19 @@
 import {
   airtable2html,
-  airtableScripting,
+  type Airtable2HtmlPreset,
   type AirtableScriptingBase,
-  type CellTransform,
 } from '../src/index.ts';
 
 declare const base: AirtableScriptingBase;
 declare const output: { markdown(value: string): void };
 
-const formatMonths: CellTransform = (value) => {
-  const totalMonths = Number.parseInt(String(value), 10);
-  if (!Number.isFinite(totalMonths) || totalMonths < 0) return '';
-
-  const years = Math.floor(totalMonths / 12);
-  const months = totalMonths % 12;
-  const parts: string[] = [];
-
-  if (years > 0) parts.push(`${years} ${years === 1 ? 'year' : 'years'}`);
-  if (months > 0 || parts.length === 0) {
-    parts.push(`${months} ${months === 1 ? 'month' : 'months'}`);
-  }
-
-  return parts.join(', ');
-};
-
-const xgpPlatforms: CellTransform = (_value, context) => {
-  const platforms = context.stringValue.split(/,\s*/u);
-  const results: string[] = [];
-
-  if (platforms.includes('Xbox One') && platforms.includes('Series X/S')) {
-    results.push('Console');
-  } else if (platforms.includes('Xbox One')) {
-    results.push('Xbox One');
-  } else if (platforms.includes('Series X/S')) {
-    results.push('Series X/S');
-  }
-
-  for (const platform of ['Cloud', 'Handheld', 'PC']) {
-    if (platforms.includes(platform)) results.push(platform);
-  }
-
-  return results.sort().join(', ');
-};
-
-const html = await airtable2html({
-  adapter: airtableScripting({ base }),
-  source: {
-    table: 'tbl6Xno8SQ5hv39nV',
-    view: 'viwXXXXXXXXXXXXXX',
+const CONFIG: Airtable2HtmlPreset = {
+  records: {
+    limit: Number.MAX_SAFE_INTEGER,
   },
-  columns: [
-    {
-      field: {
-        id: 'fldbfDOhKsGX7khac',
-        name: 'DateInferred',
-      },
-      header: 'Date',
-      transform: (value) => {
-        const text = String(value);
-        const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
-        return /^\w+ \d+ \d+$/u.test(text)
-          ? capitalized.replace(/ \d+$/u, '')
-          : capitalized;
-      },
-    },
-    {
-      field: { id: 'fldK8uiOyi8NNf38N', name: 'Game' },
-      header: 'Game',
-    },
-    {
-      field: { id: 'fldcxF12OhaWbTzR2', name: 'Tiers' },
-      header: 'Game Pass Tier(s)',
-    },
-    {
-      field: { id: 'fldshK53iuO9EIGld', name: 'Platforms' },
-      header: 'Platform(s)',
-      transform: 'xgp.platforms',
-    },
-    {
-      field: { id: 'fldwNE4saM3HFgJF3', name: 'Notes' },
-      header: 'Notes',
-    },
-  ],
-  transforms: {
-    'xgp.platforms': xgpPlatforms,
-    'xgp.months': formatMonths,
+  output: {
+    format: 'markdown',
   },
-  output: { format: 'markdown' },
   html: {
     pretty: true,
     tableAttributes: {
@@ -97,6 +24,81 @@ const html = await airtable2html({
     headerCellAttributes: { style: 'text-align:center' },
     cellAttributes: { style: 'text-align:center' },
   },
+  sources: {
+    tbl6Xno8SQ5hv39nV: {
+      view: 'viwXXXXXXXXXXXXXX',
+      columns: [
+        {
+          field: {
+            id: 'fldbfDOhKsGX7khac',
+            name: 'DateInferred',
+          },
+          header: 'Date',
+          transform: 'date.inferredMonthDay',
+        },
+        {
+          field: { id: 'fldK8uiOyi8NNf38N', name: 'Game' },
+          header: 'Game',
+        },
+        {
+          field: { id: 'fldcxF12OhaWbTzR2', name: 'Tiers' },
+          header: 'Game Pass Tier(s)',
+        },
+        {
+          field: { id: 'fldshK53iuO9EIGld', name: 'Platforms' },
+          header: 'Platform(s)',
+          transform: 'xboxGamePass.platforms',
+        },
+        {
+          field: { id: 'fldwNE4saM3HFgJF3', name: 'Notes' },
+          header: 'Notes',
+        },
+      ],
+    },
+    tbl4o8gkYPplR31gA: {
+      view: 'viwYYYYYYYYYYYYYY',
+      columns: [
+        {
+          field: { id: 'fld7kRPVQVydMYXUn', name: 'Game' },
+          header: 'Game',
+        },
+        {
+          field: { id: 'fld6MNubTTSazOZc8', name: 'dateAdded' },
+          header: 'Added',
+        },
+        {
+          field: {
+            id: 'fldQXBZmYhXM3crzA',
+            name: 'stintDurationMonths',
+          },
+          header: 'Stint Duration',
+          transform: {
+            name: 'duration.monthCount',
+            options: { abbreviate: false },
+          },
+        },
+        {
+          field: { id: 'fldvwcxwT015ya3c0', name: 'OpenCriticAvg' },
+          header: 'OpenCritic Avg.',
+          transform: {
+            name: 'fallback',
+            options: { value: 'N/A' },
+          },
+        },
+        {
+          field: { id: 'fldzjDGmHg9wdYqOp', name: 'HowLongToBeat' },
+          header: 'How Long To Beat',
+          transform: 'howLongToBeat.duration',
+        },
+      ],
+    },
+  },
+};
+
+const html = await airtable2html({
+  base,
+  config: CONFIG,
+  table: 'tbl6Xno8SQ5hv39nV',
 });
 
 output.markdown(html);
