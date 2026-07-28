@@ -1,8 +1,17 @@
 import { createAirtableTableModel } from './model.ts';
 import { renderHtml, wrapHtmlInMarkdown } from './renderers/index.ts';
+import {
+  isAirtable2HtmlScriptingOptions,
+  resolveAirtableScriptingConfig,
+} from './airtable-scripting-config.ts';
+import type { Airtable2HtmlScriptingOptions } from './airtable-scripting-config.ts';
 import type { Airtable2HtmlConfig } from './types.ts';
 
-export async function airtable2html<
+export function airtable2html(
+  options: Airtable2HtmlScriptingOptions,
+): Promise<string>;
+
+export function airtable2html<
   TableHandle,
   ViewHandle,
   FieldHandle,
@@ -14,7 +23,16 @@ export async function airtable2html<
     FieldHandle,
     RecordHandle
   >,
+): Promise<string>;
+
+export async function airtable2html(
+  input:
+    | Airtable2HtmlScriptingOptions
+    | Airtable2HtmlConfig<unknown, unknown, unknown, unknown>,
 ): Promise<string> {
+  const config = isAirtable2HtmlScriptingOptions(input)
+    ? resolveAirtableScriptingConfig(input)
+    : input;
   const model = await createAirtableTableModel(config);
   const isMarkdown = config.output?.format === 'markdown';
 
