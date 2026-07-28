@@ -174,7 +174,7 @@ npm run validate
 No build step is used for normal development:
 
 ```sh
-node examples/example.ts
+node examples/basic.airtable.ts
 node --test test/*.test.ts
 ```
 
