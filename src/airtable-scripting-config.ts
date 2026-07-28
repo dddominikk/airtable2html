@@ -31,8 +31,11 @@ export type Airtable2HtmlSourcePreset = Partial<Airtable2HtmlSettings> & {
   view?: ViewReference;
 };
 
+export type UnknownSourceAction = 'throw' | 'warn' | 'ignore';
+
 export type Airtable2HtmlPreset = Partial<Airtable2HtmlSettings> & {
   sources?: Readonly<Record<string, Airtable2HtmlSourcePreset>>;
+  unknownSourceAction?: UnknownSourceAction;
 };
 
 export interface Airtable2HtmlScriptingOptions {
@@ -64,6 +67,45 @@ function referenceMatches(
     const normalized = normalize(candidate);
     return normalized === id || normalized === name;
   });
+}
+
+function resolveUnknownSourceAction(value: unknown): UnknownSourceAction {
+  const action = value ?? 'warn';
+
+  if (action === 'throw' || action === 'warn' || action === 'ignore') {
+    return action;
+  }
+
+  throw new TypeError(
+    'config.unknownSourceAction must be "throw", "warn", or "ignore".',
+  );
+}
+
+function handleUnknownSource(
+  config: Airtable2HtmlPreset,
+  table: { id: string; name: string },
+  sourcePreset: Airtable2HtmlSourcePreset | undefined,
+  action: UnknownSourceAction,
+): void {
+  const hasConfiguredSources = Object.keys(config.sources ?? {}).length > 0;
+
+  if (!hasConfiguredSources || sourcePreset || action === 'ignore') return;
+
+  const tableDescription = `"${table.name}" (${table.id})`;
+
+  if (action === 'throw') {
+    throw new ReferenceError(
+      `airtable2html selected table ${tableDescription}, but no matching ` +
+        'entry was found in config.sources and config.unknownSourceAction ' +
+        'is "throw".',
+    );
+  }
+
+  console.warn(
+    `airtable2html selected table ${tableDescription}, but no matching ` +
+      'entry was found in config.sources. Rendering will continue because ' +
+      'config.unknownSourceAction is not "throw" (resolved action: "warn").',
+  );
 }
 
 function mergeObjects<T extends object>(
@@ -165,6 +207,9 @@ export function resolveAirtableScriptingConfig(
   const { base } = options;
   const preset = options.config ?? {};
   const adapter = airtableScripting({ base });
+  const unknownSourceAction = resolveUnknownSourceAction(
+    preset.unknownSourceAction,
+  );
 
   const firstTable = base.tables?.[0];
   const tableReference = options.table ?? firstTable?.id;
@@ -177,13 +222,20 @@ export function resolveAirtableScriptingConfig(
 
   const table = adapter.resolveTable(tableReference);
   const sourcePreset = findSourcePreset(preset, table);
+
+  handleUnknownSource(preset, table, sourcePreset, unknownSourceAction);
+
   const firstView = table.handle.views?.[0];
   const viewReference = options.view ?? sourcePreset?.view ?? firstView?.id;
   const view = viewReference
     ? adapter.resolveView(table, viewReference)
     : undefined;
 
-  const { sources: _sources, ...defaultSettings } = preset;
+  const {
+    sources: _sources,
+    unknownSourceAction: _unknownSourceAction,
+    ...defaultSettings
+  } = preset;
   const {
     table: _sourceTable,
     view: _sourceView,

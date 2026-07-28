@@ -141,6 +141,26 @@ function createFixture() {
   return { base };
 }
 
+async function captureWarnings<T>(
+  run: () => Promise<T>,
+): Promise<{ result: T; warnings: string[] }> {
+  const originalWarn = console.warn;
+  const warnings: string[] = [];
+
+  console.warn = (...values: unknown[]) => {
+    warnings.push(values.map(String).join(' '));
+  };
+
+  try {
+    return {
+      result: await run(),
+      warnings,
+    };
+  } finally {
+    console.warn = originalWarn;
+  }
+}
+
 test('defaults to the first table and its first view', async () => {
   const { base } = createFixture();
   const html = await airtable2html({
@@ -258,3 +278,100 @@ test('an explicit view overrides the matched source default view', async () => {
   assert.match(html, /Second default value/);
   assert.doesNotMatch(html, /Second special value/);
 });
+
+test(
+  'warns by default and renders with shared settings when no source matches',
+  { concurrency: false },
+  async () => {
+    const { base } = createFixture();
+    const { result: html, warnings } = await captureWarnings(() =>
+      airtable2html({
+        base,
+        table: 'First Table',
+        config: {
+          columns: [{ field: 'Name', header: 'Shared Name' }],
+          sources: {
+            tblSecond0000001: {
+              columns: [{ field: 'Value', header: 'Second Value' }],
+            },
+          },
+        },
+      }),
+    );
+
+    assert.match(html, /<th>Shared Name<\/th>/);
+    assert.match(html, /First view record/);
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0] ?? '', /selected table "First Table"/);
+    assert.match(warnings[0] ?? '', /no matching entry was found in config\.sources/);
+    assert.match(warnings[0] ?? '', /Rendering will continue/);
+    assert.match(warnings[0] ?? '', /resolved action: "warn"/);
+  },
+);
+
+test('throws when an unknown source action is set to throw', async () => {
+  const { base } = createFixture();
+
+  await assert.rejects(
+    airtable2html({
+      base,
+      table: 'First Table',
+      config: {
+        unknownSourceAction: 'throw',
+        columns: [{ field: 'Name' }],
+        sources: {
+          tblSecond0000001: {},
+        },
+      },
+    }),
+    (error: unknown) => {
+      assert.ok(error instanceof ReferenceError);
+      assert.match(error.message, /selected table "First Table"/);
+      assert.match(error.message, /unknownSourceAction is "throw"/);
+      return true;
+    },
+  );
+});
+
+test(
+  'silently renders when an unknown source action is set to ignore',
+  { concurrency: false },
+  async () => {
+    const { base } = createFixture();
+    const { result: html, warnings } = await captureWarnings(() =>
+      airtable2html({
+        base,
+        table: 'First Table',
+        config: {
+          unknownSourceAction: 'ignore',
+          columns: [{ field: 'Name' }],
+          sources: {
+            tblSecond0000001: {},
+          },
+        },
+      }),
+    );
+
+    assert.match(html, /First view record/);
+    assert.deepEqual(warnings, []);
+  },
+);
+
+test(
+  'does not warn when no source map is configured',
+  { concurrency: false },
+  async () => {
+    const { base } = createFixture();
+    const { result: html, warnings } = await captureWarnings(() =>
+      airtable2html({
+        base,
+        config: {
+          columns: [{ field: 'Name' }],
+        },
+      }),
+    );
+
+    assert.match(html, /First view record/);
+    assert.deepEqual(warnings, []);
+  },
+);

@@ -55,6 +55,7 @@ export type {
   Airtable2HtmlSettings,
   Airtable2HtmlSourcePreset,
   AirtableScriptingConfig,
+  UnknownSourceAction,
 } from './airtable-scripting-config.ts';
 export type {
   FormatMonthCountDurationOptions,
