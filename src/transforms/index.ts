@@ -1,8 +1,20 @@
+import { formatInferredDateAsMonthDay } from './format-inferred-date.ts';
+import { formatMonthCountDuration } from './format-month-count-duration.ts';
+import { normalizeHowLongToBeatDuration } from './normalize-how-long-to-beat-duration.ts';
+import { normalizeXboxGamePassPlatforms } from './normalize-xbox-game-pass-platforms.ts';
 import type {
   CellTransform,
   CellTransformContext,
   TransformReference,
 } from '../types.ts';
+
+export { formatInferredDateAsMonthDay } from './format-inferred-date.ts';
+export { formatMonthCountDuration } from './format-month-count-duration.ts';
+export { normalizeHowLongToBeatDuration } from './normalize-how-long-to-beat-duration.ts';
+export { normalizeXboxGamePassPlatforms } from './normalize-xbox-game-pass-platforms.ts';
+export type { FormatMonthCountDurationOptions } from './format-month-count-duration.ts';
+export type { NormalizeHowLongToBeatDurationOptions } from './normalize-how-long-to-beat-duration.ts';
+export type { NormalizeXboxGamePassPlatformsOptions } from './normalize-xbox-game-pass-platforms.ts';
 
 export interface FallbackTransformOptions {
   value?: unknown;
@@ -59,6 +71,10 @@ export const builtInTransforms: Readonly<Record<string, CellTransform>> = {
   regexReplace,
   join,
   trim,
+  'date.inferredMonthDay': formatInferredDateAsMonthDay,
+  'duration.monthCount': formatMonthCountDuration,
+  'howLongToBeat.duration': normalizeHowLongToBeatDuration,
+  'xboxGamePass.platforms': normalizeXboxGamePassPlatforms,
 };
 
 export function createTransformRegistry<RecordHandle = unknown>(
