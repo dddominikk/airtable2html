@@ -1,0 +1,51 @@
+{
+  "name": "airtable2html",
+  "version": "0.1.0",
+  "description": "Convert Airtable tables and views into configurable HTML tables.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./airtable": "./src/adapters/airtable-scripting.ts",
+    "./renderers": "./src/renderers/index.ts",
+    "./transforms": "./src/transforms/index.ts"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "validate": "npm run check && npm test",
+    "emit": "tsc -p tsconfig.emit.json"
+  },
+  "keywords": [
+    "airtable",
+    "html",
+    "table",
+    "typescript",
+    "esm"
+  ],
+  "author": "dddominikk",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "@types/node": "^22.0.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dddominikk/airtable2html.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dddominikk/airtable2html/issues"
+  },
+  "homepage": "https://github.com/dddominikk/airtable2html#readme"
+}
