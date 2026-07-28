@@ -50,6 +50,7 @@ export type {
   AirtableScriptingView,
 } from './adapters/airtable-scripting.ts';
 export type {
+  Airtable2HtmlConsole,
   Airtable2HtmlPreset,
   Airtable2HtmlScriptingOptions,
   Airtable2HtmlSettings,
