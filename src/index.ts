@@ -1,5 +1,9 @@
 export { airtable2html, default } from './airtable2html.ts';
-export { createAirtableTableModel, defaults, stringifyCellValue } from './model.ts';
+export {
+  createAirtableTableModel,
+  defaults,
+  stringifyCellValue,
+} from './model.ts';
 export { resolveFieldReference } from './fields.ts';
 export { airtableScripting } from './adapters/airtable-scripting.ts';
 export {
@@ -17,6 +21,7 @@ export {
   escapeHtml,
   renderHtml,
   renderMarkdown,
+  wrapHtmlInMarkdown,
 } from './renderers/index.ts';
 
 export type {
@@ -46,6 +51,8 @@ export type {
   FieldReference,
   HtmlAttributes,
   HtmlAttributeValue,
+  HtmlPipelineCallback,
+  HtmlPipelineContext,
   HtmlRenderOptions,
   MarkdownRenderOptions,
   OutputConfig,

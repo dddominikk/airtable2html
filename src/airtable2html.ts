@@ -1,5 +1,5 @@
 import { createAirtableTableModel } from './model.ts';
-import { renderHtml, renderMarkdown } from './renderers/index.ts';
+import { renderHtml, wrapHtmlInMarkdown } from './renderers/index.ts';
 import type { Airtable2HtmlConfig } from './types.ts';
 
 export async function airtable2html<
@@ -16,10 +16,34 @@ export async function airtable2html<
   >,
 ): Promise<string> {
   const model = await createAirtableTableModel(config);
+  const isMarkdown = config.output?.format === 'markdown';
 
-  return config.output?.format === 'markdown'
-    ? renderMarkdown(model, config.html, config.markdown)
-    : renderHtml(model, config.html);
+  let html = renderHtml(model, {
+    ...config.html,
+    ...(isMarkdown && config.html?.pretty === undefined
+      ? { pretty: true }
+      : {}),
+  });
+
+  for (const [index, callback] of (config.pipeline ?? []).entries()) {
+    const transformed = await callback(html, {
+      model,
+      config,
+      index,
+    });
+
+    if (typeof transformed !== 'string') {
+      throw new TypeError(
+        `HTML pipeline callback at index ${index} must return a string.`,
+      );
+    }
+
+    html = transformed;
+  }
+
+  return isMarkdown
+    ? wrapHtmlInMarkdown(html, config.markdown)
+    : html;
 }
 
 export default airtable2html;

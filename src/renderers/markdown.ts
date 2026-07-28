@@ -5,6 +5,15 @@ import type {
   TableModel,
 } from '../types.ts';
 
+export function wrapHtmlInMarkdown(
+  html: string,
+  markdownOptions: MarkdownRenderOptions = {},
+): string {
+  if (markdownOptions.fenced === false) return html;
+
+  return `\`\`\`${markdownOptions.language ?? 'html'}\n${html}\n\`\`\``;
+}
+
 export function renderMarkdown(
   model: TableModel,
   htmlOptions: HtmlRenderOptions = {},
@@ -15,7 +24,5 @@ export function renderMarkdown(
     pretty: htmlOptions.pretty ?? true,
   });
 
-  if (markdownOptions.fenced === false) return html;
-
-  return `\`\`\`${markdownOptions.language ?? 'html'}\n${html}\n\`\`\``;
+  return wrapHtmlInMarkdown(html, markdownOptions);
 }
