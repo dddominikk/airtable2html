@@ -1,5 +1,6 @@
 import { formatInferredDateAsMonthDay } from './format-inferred-date.ts';
 import { formatMonthCountDuration } from './format-month-count-duration.ts';
+import { formatScore } from './format-score.ts';
 import { normalizeHowLongToBeatDuration } from './normalize-how-long-to-beat-duration.ts';
 import { normalizeXboxGamePassPlatforms } from './normalize-xbox-game-pass-platforms.ts';
 import type {
@@ -10,9 +11,11 @@ import type {
 
 export { formatInferredDateAsMonthDay } from './format-inferred-date.ts';
 export { formatMonthCountDuration } from './format-month-count-duration.ts';
+export { formatScore } from './format-score.ts';
 export { normalizeHowLongToBeatDuration } from './normalize-how-long-to-beat-duration.ts';
 export { normalizeXboxGamePassPlatforms } from './normalize-xbox-game-pass-platforms.ts';
 export type { FormatMonthCountDurationOptions } from './format-month-count-duration.ts';
+export type { FormatScoreOptions } from './format-score.ts';
 export type { NormalizeHowLongToBeatDurationOptions } from './normalize-how-long-to-beat-duration.ts';
 export type { NormalizeXboxGamePassPlatformsOptions } from './normalize-xbox-game-pass-platforms.ts';
 
@@ -73,6 +76,8 @@ export const builtInTransforms: Readonly<Record<string, CellTransform>> = {
   trim,
   'date.inferredMonthDay': formatInferredDateAsMonthDay,
   'duration.monthCount': formatMonthCountDuration,
+  'number.score': formatScore,
+  'rating.openCritic': formatScore,
   'howLongToBeat.duration': normalizeHowLongToBeatDuration,
   'xboxGamePass.platforms': normalizeXboxGamePassPlatforms,
 };

@@ -20,6 +20,7 @@ export interface ResolvedField<FieldHandle = unknown> {
   id: string;
   name: string;
   type?: string;
+  options?: unknown;
   handle: FieldHandle;
 }
 

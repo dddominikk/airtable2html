@@ -16,6 +16,7 @@ export interface AirtableScriptingField {
   id: string;
   name: string;
   type?: string;
+  options?: unknown;
 }
 
 export interface AirtableScriptingRecord {
@@ -112,6 +113,7 @@ function wrapField(
     id: field.id,
     name: field.name,
     ...(field.type ? { type: field.type } : {}),
+    ...(field.options !== undefined ? { options: field.options } : {}),
     handle: field,
   };
 }
