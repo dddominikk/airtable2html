@@ -136,14 +136,19 @@ Built-ins:
 - `join`
 - `regexReplace`
 - `trim`
+- `number.score` (`rating.openCritic` is an alias)
 
 ```ts
 columns: [
   {
     field: 'OpenCriticAvg',
     transform: {
-      name: 'fallback',
-      options: { value: 'N/A', trim: true },
+      name: 'rating.openCritic',
+      options: {
+        min: 0,
+        max: 100,
+        default: 'N/A',
+      },
     },
   },
   {
@@ -158,6 +163,12 @@ columns: [
   },
 ]
 ```
+
+`number.score` parses finite numeric values from numbers or strings. Empty,
+invalid, out-of-range, and (by default) negative values return `N/A` or the
+configured `default`. `allowNegative` defaults to `false`. `precision` defaults
+to the resolved Airtable field's precision when available and can be overridden
+per transform.
 
 Transform context includes the raw value, Airtable string value, resolved field,
 record, record ID, row and column indexes, and transform options.

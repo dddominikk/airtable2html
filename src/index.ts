@@ -16,6 +16,7 @@ export {
   fallback,
   formatInferredDateAsMonthDay,
   formatMonthCountDuration,
+  formatScore,
   identity,
   join,
   normalizeHowLongToBeatDuration,
@@ -60,6 +61,7 @@ export type {
 } from './airtable-scripting-config.ts';
 export type {
   FormatMonthCountDurationOptions,
+  FormatScoreOptions,
   NormalizeHowLongToBeatDurationOptions,
   NormalizeXboxGamePassPlatformsOptions,
 } from './transforms/index.ts';

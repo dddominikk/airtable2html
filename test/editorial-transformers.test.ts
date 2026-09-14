@@ -5,19 +5,24 @@ import {
   createTransformRegistry,
   formatInferredDateAsMonthDay,
   formatMonthCountDuration,
+  formatScore,
   normalizeHowLongToBeatDuration,
   normalizeXboxGamePassPlatforms,
   resolveTransform,
   type CellTransformContext,
 } from '../src/index.ts';
 
-function createContext(options: unknown = undefined): CellTransformContext {
+function createContext(
+  options: unknown = undefined,
+  fieldOptions: unknown = undefined,
+): CellTransformContext {
   return {
     rawValue: undefined,
     stringValue: '',
     field: {
       id: 'fld00000000000001',
       name: 'Value',
+      ...(fieldOptions !== undefined ? { options: fieldOptions } : {}),
       handle: {},
     },
     record: {},
@@ -89,6 +94,31 @@ test('formats month counts using typed transform options', async () => {
   );
 });
 
+test('formats score values with Airtable field precision and validation options', async () => {
+  assert.equal(
+    await formatScore('89.46', createContext(undefined, { precision: 1 })),
+    '89.5',
+  );
+  assert.equal(
+    await formatScore(89.46, createContext({ precision: 2 }, { precision: 0 })),
+    '89.46',
+  );
+  assert.equal(await formatScore('-1', createContext()), 'N/A');
+  assert.equal(
+    await formatScore('-1.25', createContext({ allowNegative: true, precision: 1 })),
+    '-1.3',
+  );
+  assert.equal(await formatScore('', createContext()), 'N/A');
+  assert.equal(
+    await formatScore('not a score', createContext({ default: '—' })),
+    '—',
+  );
+  assert.equal(
+    await formatScore('101', createContext({ min: 0, max: 100, default: 'N/A' })),
+    'N/A',
+  );
+});
+
 test('registers the transformer modules for declarative config references', async () => {
   const registry = createTransformRegistry();
   const resolved = resolveTransform(
@@ -98,12 +128,28 @@ test('registers the transformer modules for declarative config references', asyn
     },
     registry,
   );
+  const scoreResolved = resolveTransform(
+    {
+      name: 'rating.openCritic',
+      options: { min: 0, max: 100, default: 'N/A' },
+    },
+    registry,
+  );
 
   assert.equal(typeof registry['date.inferredMonthDay'], 'function');
   assert.equal(typeof registry['xboxGamePass.platforms'], 'function');
   assert.equal(typeof registry['howLongToBeat.duration'], 'function');
+  assert.equal(typeof registry['number.score'], 'function');
+  assert.equal(registry['rating.openCritic'], registry['number.score']);
   assert.equal(
     await resolved.transform('13', createContext(resolved.options)),
     '1 year, 1 month',
+  );
+  assert.equal(
+    await scoreResolved.transform(
+      '91.4',
+      createContext(scoreResolved.options, { precision: 0 }),
+    ),
+    '91',
   );
 });
